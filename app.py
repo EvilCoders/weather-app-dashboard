@@ -17,13 +17,18 @@ df = df.set_index('YEAR')
 time_durations = df.columns
 
 app.layout = html.Div([
+    html.H1(children='Weather Dashboard'),
+    html.Div(children='''
+        Average Temperature Analysis
+    '''),
     html.Div([
         html.Div([
             dcc.Dropdown(
                 id='time_durs',
                 options=[{'label': i, 'value': i}
                          for i in time_durations],
-                value='Month'
+                value='Month',
+                placeholder='Select Month/time duration'
             )
         ],
             style={'width': '48%', 'display': 'inline-block'})
@@ -37,15 +42,22 @@ app.layout = html.Div([
     [Input('time_durs', 'value')])
 def update_graph(month):
     dff = df[month]
+    dff_roll = dff.rolling(20, min_periods=5).mean()
 
     return {
         'data': [go.Scatter(
             x=list(dff.index),
             y=dff.values,
+            name='Temprature',
+            mode='lines+markers'
+        ), go.Scatter(
+            x=list(dff_roll.index),
+            y=dff_roll.values,
+            name='Rolling Mean',
             mode='lines+markers'
         )],
         'layout': {
-            'height': 225,
+            'height': 525,
             'margin': {'l': 20, 'b': 30, 'r': 10, 't': 10},
             'annotations': [{
                 'x': 0, 'y': 0.85, 'xanchor': 'left', 'yanchor': 'bottom',
